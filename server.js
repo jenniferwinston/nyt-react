@@ -4,8 +4,6 @@ var bodyParser = require('body-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 
-//Require Schema
-// var History = require('./models/History.js');
 
 // Create Instance of Express
 var app = express();
@@ -18,68 +16,39 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.text());
 app.use(bodyParser.json({type:'application/vnd.api+json'}));
 
-app.use(express.static('./public'));
+app.use(express.static(process.cwd() + './public'));
 
 // -------------------------------------------------
+// Sets up Handlebars as the view engine 
+var exphbs = require('express-handlebars');
+app.engine('handlebars', exphbs({
+	defaultLayout: 'main'
+}));
+app.set('view engine', 'handlebars');
 
-// MongoDB Configuration configuration (Change this URL to your own DB)
-mongoose.connect('nytreact');
+// Configures database with mongoose
+mongoose.connect((process.env.MONGODB_URI ||'mongodb://localhost/nytreact'));
 var db = mongoose.connection;
 
-db.on('error', function (err) {
+// Displays mongoose errors
+db.on('error', function(err) {
   console.log('Mongoose Error: ', err);
 });
 
-db.once('open', function () {
+// Logs successful mongoose db login
+db.once('open', function() {
   console.log('Mongoose connection successful.');
 });
 
+// Adds routing middleware
+var public_routes = require('./controllers/public_routes.js');
+var api_routes = require('./controllers/api_routes.js');
+app.use('/', public_routes);
+app.use('/api', api_routes);
 
-// -------------------------------------------------
-
-// Main Route. This route will redirect to our rendered React application
-app.get('/', function(req, res){
-  res.sendFile('./public/views/index.handlebars');
-})
-
-// This is the route we will send GET requests to retrieve our most recent search data.
-// We will call this route the moment our page gets rendered
-// app.get('/api/', function(req, res) {
-
-  // We will find all the records, sort it in descending order, then limit the records to 5
-//   History.find({}).sort([['date', 'descending']]).limit(5)
-//     .exec(function(err, doc){
-
-//       if(err){
-//         console.log(err);
-//       }
-//       else {
-//         res.send(doc);
-//       }
-//     })
-// });
-
-// This is the route we will send POST requests to save each search.
-// app.post('/api/', function(req, res){
-//   var newSearch = new History(req.body);
-//   console.log("BODY: " + req.body.location);
-
-  // Here we'll save the location based on the JSON input. 
-  // We'll use Date.now() to always get the current date time
-//   History.create({"location": req.body.location, "date": Date.now()}, function(err){
-//     if(err){
-//       console.log(err);
-//     }
-//     else {
-//       res.send("Saved Search");
-//     }
-//   })
-// });
-
-
-// -------------------------------------------------
-
-// Listener
-app.listen(PORT, function() {
-  console.log("App listening on PORT: " + PORT);
+// Listening
+app.listen(app.get('port'), function() {
+  console.log("Express server listening on port %d in %s mode", 
+  this.address().port, app.settings.env);
 });
+
