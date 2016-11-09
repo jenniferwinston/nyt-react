@@ -9,22 +9,7 @@ var mongoose = require('mongoose');
 var app = express();
 
 
-// Run Morgan for Logging
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.text());
-// app.use(bodyParser.json({type:'application/vnd.api+json'}));
 
-app.use(express.static(process.cwd() + '/public'));
-
-// -------------------------------------------------
-// Sets up Handlebars as the view engine 
-var exphbs = require('express-handlebars');
-app.engine('handlebars', exphbs({
-	defaultLayout: 'main'
-}));
-app.set('view engine', 'handlebars');
 
 // Configures database with mongoose
 mongoose.connect((process.env.MONGODB_URI ||'mongodb://localhost/nytreact'));
