@@ -7,16 +7,16 @@ var mongoose = require('mongoose');
 
 // Create Instance of Express
 var app = express();
-var PORT = process.env.PORT || 3000; // Sets an initial port. We'll use this later in our listener
+
 
 // Run Morgan for Logging
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.text());
-app.use(bodyParser.json({type:'application/vnd.api+json'}));
+// app.use(bodyParser.json({type:'application/vnd.api+json'}));
 
-app.use(express.static(process.cwd() + './public'));
+app.use(express.static(process.cwd() + '/public'));
 
 // -------------------------------------------------
 // Sets up Handlebars as the view engine 
@@ -47,8 +47,8 @@ app.use('/', public_routes);
 app.use('/api', api_routes);
 
 // Listening
-app.listen(app.get('port'), function() {
-  console.log("Express server listening on port %d in %s mode", 
-  this.address().port, app.settings.env);
+var PORT = process.env.PORT || 3000;
+app.listen(PORT, function (){
+	console.log("Listening on " + PORT);
 });
 
