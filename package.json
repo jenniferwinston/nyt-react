@@ -1,0 +1,31 @@
+{
+  "name": "projreact",
+  "version": "1.0.0",
+  "description": "react",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jenniferwinston/nyt-react.git"
+  },
+  "keywords": [
+    "react"
+  ],
+  "author": "jen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jenniferwinston/nyt-react/issues"
+  },
+  "homepage": "https://github.com/jenniferwinston/nyt-react#readme",
+  "dependencies": {
+    "axios": "^0.15.2",
+    "babel-core": "^6.18.2",
+    "express": "^4.14.0",
+    "react": "^15.3.2",
+    "react-dom": "^15.3.2"
+  },
+  "devDependencies": {}
+}
