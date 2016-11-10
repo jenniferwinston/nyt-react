@@ -16,7 +16,7 @@ var PORT = process.env.PORT || 3000;
 
 if (process.env.MONGODB_URI) {
   mongoose.connect(process.env.MONGODB_URI);
-},
+}
 else {
   mongoose.connect('mongodb://localhost/nytimes');
 };
@@ -30,7 +30,7 @@ db.once('open', function() {
   console.log('Mongoose connection successful.');
 });
 
-var Article = require('./article.js');
+var Article = require('./models/article.js');
 
 app.post('/submit', function(req, res) {
 
