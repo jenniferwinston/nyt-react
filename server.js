@@ -1,84 +1,68 @@
-//Server Dependencies
 var express = require('express');
+var app = express();
 var bodyParser = require('body-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 
-//Require Article Schema
-var Article = require('./models/article.js');
 
-// Create Instance of Express
-var app = express();
-var PORT = process.env.PORT || 3000; // Sets an initial port. We'll use this later in our listener
-
-// Run Morgan for Logging
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.text());
-app.use(bodyParser.json({type:'application/vnd.api+json'}));
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
+app.use(express.static('public'));
 
-app.use(express.static('./public'));
+var PORT = process.env.PORT || 3000; 
 
-// -------------------------------------------------
 
-// MongoDB Configuration configuration 
-mongoose.connect('mongodb://heroku_knckmz47:6lj3ssjcs2cnvgm0s95t2uijr5@ds147777.mlab.com:47777/heroku_knckmz47');
+if (process.env.MONGODB_URI) {
+  mongoose.connect(process.env.MONGODB_URI);
+},
+else {
+  mongoose.connect('mongodb://localhost/nytimes');
+};
+
 var db = mongoose.connection;
 
-db.on('error', function (err) {
+db.on('error', function(err) {
   console.log('Mongoose Error: ', err);
 });
-
-db.once('open', function () {
+db.once('open', function() {
   console.log('Mongoose connection successful.');
 });
 
+var Article = require('./article.js');
 
-// -------------------------------------------------
+app.post('/submit', function(req, res) {
 
-// Main Route. This route will redirect to our rendered React application
-app.get('/', function(req, res){
-  res.sendFile('./public/index.html');
-})
+  var content = new Article(req.body);
+ 
+  content.save(req.body, function(err, saved) {
+    if (err) {
+      console.log('error saving to mongo ',err);
+    } else {
+      console.log('saved data',saved);
+      res.send(saved);
+    }
+  });
 
-// This is the route we will send GET requests to retrieve our most recent search data.
-app.get('/api/', function(req, res) {
-
-  // find all the articles, sort it in descending order, then limit the articles to 5
-  Article.find({}).sort([['date', 'descending']]).limit(5)
-    .exec(function(err, doc){
-
-      if(err){
-        console.log(err);
-      }
-      else {
-        res.send(doc);
-      }
-    })
 });
 
-// This is the route we will send POST requests to save each search.
-app.post('/api/', function(req, res){
-  var newSearch = new Article(req.body);
-  console.log("BODY: " + req.body.location);
-
-  // save the location based on the JSON input. 
-  // use Date.now() to always get the current date time
-  Article.create({"location": req.body.location, "date": Date.now()}, function(err){
-    if(err){
+app.get('/all', function(req, res) {
+ 
+  Article.find({}, function(err, found) {
+    if (err) {
       console.log(err);
+    } else {
+      res.json(found);
     }
-    else {
-      res.send("Saved Search");
-    }
-  })
+  });
 });
 
 
-// -------------------------------------------------
+app.get('/', function(req, res) {
+  res.send(index.html);
+});
 
-// Listener
 app.listen(PORT, function() {
-  console.log("App listening on PORT: " + PORT);
+  console.log('App running on',PORT);
 });
