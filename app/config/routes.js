@@ -5,7 +5,7 @@ var React = require('react');
 //reference the components - you don't need the file extension because jsx automatically renders it
 var Main = require('../components/Main');
 var Saved = require('../components/Saved');
-var Search = require('../components/Search.js');
+var Search = require('../components/Search');
 
 //to pull the router
 var Router = require('react-router');

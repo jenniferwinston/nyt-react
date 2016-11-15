@@ -7,9 +7,11 @@ var mongoose = require('mongoose');
 
 app.use(logger('dev'));
 app.use(bodyParser.urlencoded({
-  extended: false
+  extended: true
 }));
-app.use(express.static('public'));
+app.use(bodyParser.text());
+app.use(bodyParser.json({type:'application/vnd.api+json'}));
+app.use(express.static('./public'));
 
 var PORT = process.env.PORT || 3000; 
 
@@ -30,37 +32,50 @@ db.once('open', function() {
   console.log('Mongoose connection successful.');
 });
 
-var Article = require('./models/article.js');
+var Article = require('./server/model.js');
 
-app.post('/submit', function(req, res) {
+// routes
 
-  var content = new Article(req.body);
+app.post('/api/saved', function(req, res) {
+
+  var newArticle = new Article(req.body);
  
-  content.save(req.body, function(err, saved) {
-    if (err) {
-      console.log('error saving to mongo ',err);
-    } else {
-      console.log('saved data',saved);
-      res.send(saved);
-    }
+  var title = req.body.title;
+  var date =req.body.date;
+  var url = req.body.url;
+
+  newArticle.save(function(err, doc){
+    if(err){
+      console.log(err);
+    } else { res.send(doc._id); }
   });
+};
 
-});
 
-app.get('/all', function(req, res) {
+app.get('/api/saved', function(req, res) {
  
-  Article.find({}, function(err, found) {
+  Article.find({}).exec(function(err, doc) {
     if (err) {
       console.log(err);
     } else {
-      res.json(found);
+      res.json(doc);
     }
   });
+});
+
+app.delete('/api/saved/', function(req, res){
+    var url = req.param('url');
+
+    Article.find({"url": url}).remove().exec(function(err, data){
+        if(err){
+          console.log(err);
+        } else { res.send("deleted");}
+    });
 });
 
 
 app.get('/', function(req, res) {
-  res.send(index.html);
+  res.sendFile('./public/index.html');
 });
 
 app.listen(PORT, function() {
